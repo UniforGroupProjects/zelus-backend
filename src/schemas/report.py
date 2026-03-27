@@ -2,20 +2,20 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
 
-# 1. Definição básica (o que é comum a todos)
+# 1. Definição básica 
 class ReportBase(BaseModel):
     title: str
     description: str
     category: str
     latitude: float
     longitude: float
-    image_url: Optional[str] = None # Deixe aqui para facilitar a Tarefa #4 depois!
+    image_url: Optional[str] = None 
 
 # 2. O que o usuário envia (Request)
 class ReportCreate(ReportBase):
     pass
 
-# 3. O que a API devolve (Response) - ESSA PARTE É A QUE ESTÁ FALTANDO!
+# 3. O que a API devolve (Response) 
 class ReportResponse(ReportBase):
     id: int
     status: str = "Aberto"
@@ -24,3 +24,11 @@ class ReportResponse(ReportBase):
 
     class Config:
         from_attributes = True
+
+# 4. O que o usuário envia para editar 
+class ReportUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    category: Optional[str] = None
+    status: Optional[str] = None
+    image_url: Optional[str] = None

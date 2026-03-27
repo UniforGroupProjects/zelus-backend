@@ -4,7 +4,7 @@ from typing import List
 
 # Importações de conexão e lógica
 from src.database import get_db
-from src.schemas.report import ReportCreate, ReportResponse
+from src.schemas.report import ReportCreate, ReportResponse, ReportUpdate
 from src.services import report as report_service
 
 # Importação da segurança (que está na raiz)
@@ -72,4 +72,33 @@ def delete_existing_report(
             detail="Você não tem permissão para apagar uma denúncia que não é sua!"
         )
     
-    return None # O status 204 não devolve corpo de texto, apenas confirma que sumiu
+    return None 
+
+@router.patch("/{report_id}", response_model=ReportResponse)
+def update_existing_report(
+    report_id: int,
+    report_data: ReportUpdate,
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id)
+):
+    """
+    Atualiza uma denúncia existente. 
+    Apenas os campos enviados serão alterados (PATCH).
+    """
+    updated_report = report_service.update_report(
+        db=db, 
+        report_id=report_id, 
+        user_id=current_user_id, 
+        report_data=report_data
+    )
+    
+    if updated_report is None:
+        raise HTTPException(status_code=404, detail="Denúncia não encontrada")
+        
+    if updated_report == "not_authorized":
+        raise HTTPException(
+            status_code=403, 
+            detail="Você não tem permissão para editar uma denúncia que não é sua!"
+        )
+        
+    return updated_report

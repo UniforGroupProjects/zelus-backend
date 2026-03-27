@@ -9,7 +9,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 SECRET_KEY = "sua_chave_secreta_muito_longa_aqui" 
 ALGORITHM = "HS256"
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login") # "login" deve ser a sua rota de login
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login") # "login" deve ser a rota de 
 
 def get_password_hash(password: str):
     """Transforma senha em código secreto"""

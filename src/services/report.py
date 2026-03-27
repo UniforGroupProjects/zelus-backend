@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from src.models.report import Report
-from src.schemas.report import ReportCreate
+from src.schemas.report import ReportCreate, ReportUpdate
 
 def create_report(db: Session, report_data: ReportCreate, user_id: int):
     # Criamos o objeto associando ao ID do usuário autenticado
@@ -32,7 +32,7 @@ def delete_report(db: Session, report_id: int, user_id: int):
     if not db_report:
         return None
     
-    # 3. SEGURANÇA: Se o dono da denúncia não for quem está logado, dá erro!
+    # 3. SEGURANÇA: Se o dono da denúncia não for quem está logado, dá erro
     if db_report.user_id != user_id:
         return "not_authorized"
 
@@ -40,3 +40,26 @@ def delete_report(db: Session, report_id: int, user_id: int):
     db.delete(db_report)
     db.commit()
     return True
+
+def update_report(db: Session, report_id: int, user_id: int, report_data: ReportUpdate):
+    # 1. Busca a denúncia
+    db_report = db.query(Report).filter(Report.id == report_id).first()
+    
+    # 2. Se não existir, avisa
+    if not db_report:
+        return None
+        
+    # 3. SEGURANÇA: Só o dono pode editar
+    if db_report.user_id != user_id:
+        return "not_authorized"
+        
+    # 4. A MÁGICA: Pega só os campos que o usuário preencheu e ignora os vazios
+    update_data = report_data.model_dump(exclude_unset=True)
+    
+    for key, value in update_data.items():
+        setattr(db_report, key, value) # Substitui o valor antigo pelo novo
+        
+    # 5. Salva no banco
+    db.commit()
+    db.refresh(db_report)
+    return db_report
