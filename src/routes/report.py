@@ -54,3 +54,22 @@ def read_report(report_id: int, db: Session = Depends(get_db)):
     if db_report is None:
         raise HTTPException(status_code=404, detail="Denúncia não encontrada")
     return db_report
+
+@router.delete("/{report_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_existing_report(
+    report_id: int, 
+    db: Session = Depends(get_db), 
+    current_user_id: int = Depends(get_current_user_id)
+):
+    success = report_service.delete_report(db, report_id, user_id=current_user_id)
+    
+    if success is None:
+        raise HTTPException(status_code=404, detail="Denúncia não encontrada")
+    
+    if success == "not_authorized":
+        raise HTTPException(
+            status_code=403, 
+            detail="Você não tem permissão para apagar uma denúncia que não é sua!"
+        )
+    
+    return None # O status 204 não devolve corpo de texto, apenas confirma que sumiu
