@@ -2,21 +2,29 @@ from fastapi import FastAPI
 # 1. Adicionamos 'auth' aqui na lista de importação
 from src.routes import auth, report, user 
 from src.database import engine, Base
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="Zelus API")
 
-print("--- Verificando Banco de Dados ---", flush=True)
+# 1. Criamos o banco
 try:
-    # Força a criação das tabelas no banco de dados
     Base.metadata.create_all(bind=engine)
-    print("Tabelas verificadas/criadas com sucesso!", flush=True)
 except Exception as e:
     print(f"Erro ao conectar no banco: {e}", flush=True)
 
-# 2. Registramos as rotas. A de auth (login) é bom ficar em primeiro!
+# 2. Adicionamos a segurança
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # Em produção, coloque o endereço do seu front
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+# 3. Registramos as rotas. A de auth (login) é bom ficar em primeiro!
 app.include_router(auth.router)
 app.include_router(report.router)
 app.include_router(user.router)
+
 
 @app.get("/")
 def home():
