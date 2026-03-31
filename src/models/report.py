@@ -11,7 +11,6 @@ class Report(Base):
     description = Column(String(500), nullable=False)
     category = Column(String(50))
     
-    # Coordenadas para o mapa
     latitude = Column(Float, nullable=False)
     longitude = Column(Float, nullable=False)
     
@@ -20,9 +19,7 @@ class Report(Base):
     
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    # Chave estrangeira para o usuário que criou
     user_id = Column(Integer, ForeignKey("users.id"))
 
-    # Relacionamentos
     owner = relationship("User", back_populates="reports")
     comments = relationship("Comment", back_populates="report")
